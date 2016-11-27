@@ -43,14 +43,14 @@ does NOT.! (purposely done so for higher dificulty)
 going, and the ship's speed increases by 2 EVERY time it either touches the TOP white wall
 OR BOTTOM white wall as it does not react to panel collision only to the collision of these walls.
 
-6.The only way to save the ship (Keep the pink rectangle from touching the white left wall or the
+7.The only way to save the ship (Keep the pink rectangle from touching the white left wall or the
 right one) is by hitting the YELLOW ball with EITHER the red or green paddel. This will cause the
 ship to ALWAYS go in the opposite direction. So if it's headed toward either one of these walls
 (left or right white walls) and the yellow ball is hit before the ship reaches any of these walls,
 the ship will start moving in the exact opposite direction avoiding collision with either one of
 these walls.
 
-7. The Objective of the game is to attain the highest score possible until the game is lost.
+8. The Objective of the game is to attain the highest score possible until the game is lost.
 
 ---------------->USING THE PANELS<-------------------
 As stated earlier both the red and green panels can move in ANY direction with increasing speed.
