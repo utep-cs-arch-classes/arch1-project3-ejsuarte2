@@ -401,13 +401,11 @@ void wdt_c_handler(){
       }else{	
 	str[i] = '0'+i;
 	//move panels as requested
-	manageButtonPress(i, &ml1, &ml0);
-	 
+	manageButtonPress(i, &ml1, &ml0);	 
       }
     }
     str[4]=0;
     drawString5x7(20,10, str, COLOR_YELLOW, COLOR_BLUE);
-    
     redrawScreen = 1;
     count = 0;
   }
