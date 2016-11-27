@@ -1,0 +1,81 @@
+#include <msp430.h>
+#include "game_buzzer.h"
+static unsigned int period = 1000;
+static signed int rate = 200;	
+#define PORT2_CONFIGURE P2SEL2
+#define P2_PIN_BEHAVIOR P2SEL
+#define P2_INPUT_OUTPUT P2DIR
+#define MIN_PERIOD 1000
+#define MAX_PERIOD 2000
+
+void buzzer_setup(){
+    
+    timerAUpmode();		       //used to drive speaker 
+    PORT2_CONFIGURE &= ~(BIT6 | BIT7);
+    P2_PIN_BEHAVIOR &= ~BIT7; 
+    P2_PIN_BEHAVIOR |= BIT6;
+    P2_INPUT_OUTPUT = BIT6;		//enable output to speaker (P2.6) 
+
+}
+
+
+void buzzer_beat1() {
+  period += rate +100;
+  char  rate_and_Period_greater = (rate > 0 && (period > MAX_PERIOD));
+  char  rate_and_Period_smaller = (rate < 0 && (period < MIN_PERIOD));
+  if (rate_and_Period_greater ||  rate_and_Period_smaller) {
+    rate *= rate;
+    period += (rate << 1);
+  }
+  buzzer_set_period((period*period) * 0x20);
+}
+
+void buzzer_beat2() {
+
+  period += (rate*2);
+  char  rate_and_Period_greater = (rate > 0 && (period > MAX_PERIOD));
+  char  rate_and_Period_smaller = (rate < 0 && (period < MIN_PERIOD));
+  if (rate_and_Period_greater ||  rate_and_Period_smaller) {
+    rate *= -rate;
+    period += (rate << 1);
+  }
+  buzzer_set_period((period*period) + 20);
+  
+}
+
+void buzzer_beat3() {
+  period += rate;
+  char  rate_and_Period_greater = (rate > 0 && (period > MAX_PERIOD));
+  char  rate_and_Period_smaller = (rate < 0 && (period < MIN_PERIOD));
+  if (rate_and_Period_greater ||  rate_and_Period_smaller) {
+    rate *= rate;
+    period += (rate << 1);
+  }
+  buzzer_set_period((period*period) * 0x20);
+}
+
+void buzzer_beat4() {
+
+  period += rate;
+  char  rate_and_Period_greater = (rate > 0 && (period > MAX_PERIOD));
+  char  rate_and_Period_smaller = (rate < 0 && (period < MIN_PERIOD));
+  if (rate_and_Period_greater ||  rate_and_Period_smaller) {
+    rate *= -rate;
+    period += (rate << 1);
+  }
+  buzzer_set_period((period^2) + 20);
+  
+}
+
+void buzzer_set_period(short cycles){
+  //cycles to play  sound!!
+  
+  CCR0 = cycles - 1000; 
+  CCR1 = cycles >> 1;		//one half cycle 
+}
+
+   
+    
+  
+
+ 
