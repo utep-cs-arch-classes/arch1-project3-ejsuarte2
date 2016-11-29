@@ -205,13 +205,13 @@ void checkForCollision(Layer *layer0, Layer *layer1, Layer *layer3, Layer *layer
 	//shut sound off bit 6 for sound output
 	P2SEL |= ~6;
 	P2DIR = ~6;       
-	clearScreen(COLOR_NAVY);
+	clearScreen(COLOR_STEEL_BLUE);
 	drawString5x7(30,50, "GAME OVER!!", COLOR_GREEN, COLOR_BLACK);
 	drawString5x7(30,60, "GAME OVER!!", COLOR_RED, COLOR_BLACK);
 	drawString5x7(30,70, "GAME OVER!!", COLOR_WHITE, COLOR_BLACK);
 	drawString5x7(30,80, "GAME OVER!!", COLOR_YELLOW, COLOR_BLACK);
-	
-       
+	drawString5x7(10,10, "GAME OVER!!", COLOR_GREEN, COLOR_RED);
+       drawString5x7(10,140, "GAME OVER!!", COLOR_GREEN, COLOR_RED);
 	//CPU off show light off
 	or_sr(0x10);
 	P1OUT &= ~GREEN_LED;
@@ -371,8 +371,8 @@ void main(){
 
        
     strScore[3] = 0;
-    drawString5x7( 90, 15, strScore, COLOR_PINK, COLOR_BLACK);
-    drawString5x7( 45, 5, "YOUR SCORE: ", COLOR_PINK, COLOR_BLACK);
+    drawString5x7( 90, 15, strScore, COLOR_BEIGE, COLOR_BLACK);
+    drawString5x7( 45, 5, "YOUR SCORE: ", COLOR_GOLD, COLOR_BLACK);
     
     //Pause CPU if screen doesn't need updating 
     while (!redrawScreen) {
