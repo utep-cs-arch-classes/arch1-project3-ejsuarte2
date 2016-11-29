@@ -29,8 +29,7 @@ loses.*/
 #define GREEN_LED BIT6
 #define REC_WIDTH 2
 #define REC_LENGTH 10
-u_int score = 0;
-char strScore[2];
+static int addPoint;
 
 
 int abSlicedRectCheck(const AbRect *rect, const Vec2 *centerPos, const Vec2 *pixel){
@@ -144,7 +143,7 @@ typedef struct MovLayer_s {
 } MovLayer;
 
 MovLayer ml4 = { &layer4, {1,-2}, 0 };//speed and direction of prople ship
-MovLayer ml3 = { &layer3, {1,1}, &ml4 }; //add a 0 in &ml4 for blue square not to move
+MovLayer ml3 = { &layer3, {-1,2}, &ml4 }; //add a 0 in &ml4 for blue square not to move
 MovLayer ml1 = { &layer1, {0,1}, &ml3 }; 
 MovLayer ml0 = { &layer0, {0,1}, &ml1 }; 
 
@@ -211,9 +210,8 @@ void checkForCollision(Layer *layer0, Layer *layer1, Layer *layer3, Layer *layer
 	drawString5x7(30,60, "GAME OVER!!", COLOR_RED, COLOR_BLACK);
 	drawString5x7(30,70, "GAME OVER!!", COLOR_WHITE, COLOR_BLACK);
 	drawString5x7(30,80, "GAME OVER!!", COLOR_YELLOW, COLOR_BLACK);
-	drawString5x7(30,90, "YOUR SCORE: ", COLOR_CYAN, COLOR_BLACK);
-	drawString5x7(30,100, strScore, COLOR_CYAN, COLOR_BLACK);
 	
+       
 	//CPU off show light off
 	or_sr(0x10);
 	P1OUT &= ~GREEN_LED;
@@ -229,7 +227,8 @@ void checkForCollision(Layer *layer0, Layer *layer1, Layer *layer3, Layer *layer
 		 (ball->pos.axes[1] <= redPanel->pos.axes[1] + REC_LENGTH)  ||
 		 (ball->pos.axes[0]+recRadius >= greenPanel->pos.axes[0] -REC_WIDTH) &&
 		 (ball->pos.axes[1] <= greenPanel->pos.axes[1] + REC_LENGTH) &&
-		 (ball->pos.axes[1] >= greenPanel->pos.axes[1] - REC_LENGTH)/* ||
+		 (ball->pos.axes[1] >= greenPanel->pos.axes[1] - REC_LENGTH)
+		 /*    ||
 		 //for easy game uncomment
 		 (ship->pos.axes[0]-recRadius <= redPanel->pos.axes[0] + REC_WIDTH) &&
 		 (ship->pos.axes[1] >= redPanel->pos.axes[1] - REC_LENGTH) &&
@@ -238,12 +237,13 @@ void checkForCollision(Layer *layer0, Layer *layer1, Layer *layer3, Layer *layer
 		 (ship->pos.axes[1] <= greenPanel->pos.axes[1] + REC_LENGTH) &&
 		 (ship->pos.axes[1] >= greenPanel->pos.axes[1] - REC_LENGTH) */){
 	
-	
-	score+=1;
-        
+	//set flag to give points
+	addPoint = 1;
+	//change velocity and direction
 	int velocity = ml->velocity.axes[axis] = -ml->velocity.axes[axis];
-	newPos.axes[axis] += (7*velocity);
-      }//outside fence and panels
+	newPos.axes[axis] += (8*velocity);
+        
+      }//no collision
     } //for axis 
     ml->layer->posNext = newPos;
   } //for ml 
@@ -270,7 +270,7 @@ void manageButtonPress(int i, MovLayer *redLayer,MovLayer *greenLayer){
        newPosRed.axes[1] += (velocity -10);
        redLayer->layer->posNext = newPosRed;
        //move green panel down
-       newPosGreen.axes[1] += (velocity -10);
+       newPosGreen.axes[1] += (velocity  -10);
        greenLayer->layer->posNext = newPosGreen;
   }else if( i == button2){
        //make going up sound
@@ -300,25 +300,7 @@ void manageButtonPress(int i, MovLayer *redLayer,MovLayer *greenLayer){
        newPosRed.axes[0] += (velocity -10);
        redLayer->layer->posNext = newPosRed;
   }
-    /*
-    //for easy and game play 
-   if(i == 0){
-     //move red panel up
-    newPosRed.axes[1] += (velocity +10);
-    redLayer->layer->posNext = newPosRed;
-  }else if( i == 1){
-     //move red panel down
-    newPosRed.axes[1] += (velocity -10);
-    redLayer->layer->posNext = newPosRed;
-  }else if(i == 2){
-     //move green panel up
-    newPosGreen.axes[1] += (velocity +10);
-    greenLayer->layer->posNext = newPosGreen;
-  }else if( i == 3){
-     //move green panel down
-    newPosGreen.axes[1] += (velocity -10);
-    greenLayer->layer->posNext = newPosGreen;
-  }*/
+    
   
 }
 //The background color
@@ -334,7 +316,7 @@ Region fieldFence;
  */
 void main(){
 
-  /**< Green led on when CPU on */		
+  //Green led on when CPU on 		
   P1DIR |= GREEN_LED;		
   P1OUT |= GREEN_LED;
 
@@ -350,19 +332,47 @@ void main(){
   
   layerGetBounds(&fieldLayer, &fieldFence);
 
-  /**< enable periodic interrupt */
+  //enable periodic interrupt
   enableWDTInterrupts();
-  /**< GIE (enable interrupts) */
+  //GIE (enable interrupts)
   or_sr(0x8);	              
-
-  strScore[0] = '-' ;
-
-
+  int oneDigitPoints = 0;
+  int twoDigitPoints = 0;
+  int threeDIgitPoints = 0;
+  
+  //initialize scoreboard
+   char strScore[4];
+   u_int i ;
+  for(i = 0; i < 4; i++){
+     strScore[i] = '0';
+  }
+  
   for(;;){
-    
-    
-    drawString5x7( 45, 5, "YOUR SCORE: ", COLOR_PINK, COLOR_BLACK);
+    //increment the score points if flag is on
+    if( addPoint == 1 && oneDigitPoints < 9){
+      oneDigitPoints++;
+      strScore[2] = '0'+oneDigitPoints;
+      addPoint = 0;
+    }else if(addPoint == 1 && oneDigitPoints == 9 && twoDigitPoints < 9) {
+      oneDigitPoints = 0;
+      twoDigitPoints++;
+      strScore[2] = '0' + oneDigitPoints;
+      strScore[1] = '0'+twoDigitPoints;
+      addPoint = 0;
+    }else if(addPoint == 1 && oneDigitPoints == 9 && twoDigitPoints == 9 && threeDIgitPoints < 9) {
+      oneDigitPoints = 0;
+      twoDigitPoints = 0;
+      threeDIgitPoints++;
+      strScore[2] = '0' + oneDigitPoints;
+      strScore[1] = '0' + twoDigitPoints;
+      strScore[0] = '0' + threeDIgitPoints;
+      addPoint = 0;
+    }
+
+       
+    strScore[3] = 0;
     drawString5x7( 90, 15, strScore, COLOR_PINK, COLOR_BLACK);
+    drawString5x7( 45, 5, "YOUR SCORE: ", COLOR_PINK, COLOR_BLACK);
     
     //Pause CPU if screen doesn't need updating 
     while (!redrawScreen) {
@@ -376,8 +386,7 @@ void main(){
     P1OUT |= GREEN_LED;       
     redrawScreen = 0;
     movLayerDraw(&ml0, &layer0);
-    strScore[0] = '0'+score;
-  }
+  }//end of for
   
 }
 
@@ -388,9 +397,7 @@ void wdt_c_handler(){
   //Green LED on when cpu on
   P1OUT |= GREEN_LED;		      
   count ++;
-  
   if (count == 15) {
-    
     //moves shapes and implements colision effect
     checkForCollision(&layer0, &layer1, &layer3, &layer4, &ml0, &fieldFence);
     u_int switches = p2sw_read(),i;
